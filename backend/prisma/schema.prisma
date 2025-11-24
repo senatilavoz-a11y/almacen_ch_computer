@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+}
+
+enum MovementType {
+  ENTRADA
+  SALIDA
+}
+
+model User {
+  id        String          @id @default(uuid())
+  email     String          @unique
+  password  String
+  name      String
+  role      UserRole        @default(EMPLOYEE)
+  active    Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  movementBatches MovementBatch[]
+
+  @@map("users")
+}
+
+model Supplier {
+  id          String   @id @default(uuid())
+  name        String
+  contact     String?
+  email       String?
+  phone       String?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+
+  @@map("suppliers")
+}
+
+model Brand {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  code        String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+  models      Model[]
+
+  @@map("brands")
+}
+
+model Model {
+  id          String   @id @default(uuid())
+  name        String
+  code        String?  @unique
+  brandId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand       Brand?   @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  products    Product[]
+
+  @@map("models")
+  @@index([brandId])
+}
+
+model Product {
+  id              String    @id @default(uuid())
+  name            String
+  code            String    @unique
+  modelId         String
+  brandId         String
+  serialNumber    String
+  quantity        Int       @default(0)
+  minStock        Int       @default(0)
+  supplierId      String
+  location        String
+  photo           String?
+  document        String?
+  description     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  supplier        Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  brand           Brand     @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  model           Model     @relation(fields: [modelId], references: [id], onDelete: Restrict)
+  movements       Movement[]
+
+  @@map("products")
+}
+
+model Movement {
+  id        String        @id @default(uuid())
+  batchId   String
+  productId String
+  quantity  Int
+
+  batch     MovementBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("movements")
+  @@index([productId])
+  @@index([batchId])
+}
+
+model MovementBatch {
+  id            String       @id @default(uuid())
+  code          String       @unique
+  type          MovementType
+  reason        String?
+  notes         String?
+  totalQuantity Int          @default(0)
+  createdAt     DateTime     @default(now())
+  userId        String
+
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movements     Movement[]
+
+  @@map("movement_batches")
+  @@index([createdAt])
+}
+
+model StorageLocation {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("storage_locations")
+}
+
