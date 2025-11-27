@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import { Plus, Edit, Trash2, Shield, User as UserIcon } from 'lucide-react';
-
+ 
 export default function Users() {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const queryClient = useQueryClient();
-
+ 
   const { data: users, isLoading } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
@@ -15,7 +15,7 @@ export default function Users() {
       return response.data;
     },
   });
-
+ 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       await api.delete(`/users/${id}`);
@@ -24,17 +24,17 @@ export default function Users() {
       queryClient.invalidateQueries(['users']);
     },
   });
-
+ 
   const handleEdit = (user) => {
     setEditingUser(user);
     setShowForm(true);
   };
-
+ 
   const handleClose = () => {
     setShowForm(false);
     setEditingUser(null);
   };
-
+ 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -42,7 +42,7 @@ export default function Users() {
       </div>
     );
   }
-
+ 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -58,7 +58,7 @@ export default function Users() {
           Nuevo Usuario
         </button>
       </div>
-
+ 
       {showForm && (
         <UserForm
           user={editingUser}
@@ -69,7 +69,7 @@ export default function Users() {
           }}
         />
       )}
-
+ 
       <div className="card overflow-x-auto">
         <table className="table">
           <thead>
@@ -89,11 +89,10 @@ export default function Users() {
                 <td>{user.email}</td>
                 <td>
                   <span
-                    className={`inline-flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${
-                      user.role === 'ADMIN'
+                    className={`inline-flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium ${user.role === 'ADMIN'
                         ? 'bg-purple-100 text-purple-800'
                         : 'bg-blue-100 text-blue-800'
-                    }`}
+                      }`}
                   >
                     {user.role === 'ADMIN' ? (
                       <Shield size={14} />
@@ -105,16 +104,15 @@ export default function Users() {
                 </td>
                 <td>
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      user.active
+                    className={`px-2 py-1 rounded text-xs font-medium ${user.active
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
-                    }`}
+                      }`}
                   >
                     {user.active ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
-                <td>{user._count?.movements || 0}</td>
+                <td>{user._count?.movementBatches || 0}</td>
                 <td>
                   <div className="flex space-x-2">
                     <button
@@ -143,7 +141,7 @@ export default function Users() {
     </div>
   );
 }
-
+ 
 function UserForm({ user, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -152,7 +150,7 @@ function UserForm({ user, onClose, onSuccess }) {
     role: user?.role || 'EMPLOYEE',
     active: user?.active !== undefined ? user.active : true,
   });
-
+ 
   const mutation = useMutation({
     mutationFn: async (data) => {
       if (user) {
@@ -163,7 +161,7 @@ function UserForm({ user, onClose, onSuccess }) {
     },
     onSuccess: onSuccess,
   });
-
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
     const data = { ...formData };
@@ -172,7 +170,7 @@ function UserForm({ user, onClose, onSuccess }) {
     }
     mutation.mutate(data);
   };
-
+ 
   return (
     <div className="card">
       <h2 className="text-xl font-semibold mb-4">
@@ -260,4 +258,6 @@ function UserForm({ user, onClose, onSuccess }) {
     </div>
   );
 }
-
+ 
+ 
+ 

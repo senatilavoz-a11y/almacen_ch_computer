@@ -698,7 +698,7 @@ export default function ProductForm() {
             rows="4"
           />
         </div>
-
+        {/*
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Foto del Producto
@@ -715,6 +715,7 @@ export default function ProductForm() {
             </p>
           )}
         </div>
+        */}
 
         <div className="flex justify-end space-x-4">
           <button
